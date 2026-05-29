@@ -68,3 +68,38 @@ class Train(models.Model):
             f"({self.carriages_count} carriages, "
             f"{self.seats_in_carriage} seats per carriage)"
         )
+
+
+class Journey(models.Model):
+    route = models.ForeignKey(
+        Route,
+        on_delete=models.CASCADE,
+        related_name="journeys"
+    )
+    train = models.ForeignKey(
+        Train,
+        on_delete=models.CASCADE,
+        related_name="journeys"
+    )
+    departure_time = models.DateTimeField()
+    arrival_time = models.DateTimeField()
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(arrival_time__gt=models.F("departure_time")),
+                name="arrival_after_departure"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.route} | {self.train.name} | {self.departure_time}"
+
+
+class Crew(models.Model):
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    journeys = models.ManyToManyField(Journey, related_name="crews")
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
