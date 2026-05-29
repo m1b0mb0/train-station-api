@@ -116,3 +116,30 @@ class Order(models.Model):
 
     def __str__(self):
         return str(self.created_at)
+
+
+class Ticket(models.Model):
+    carriage = models.PositiveIntegerField()
+    seat = models.PositiveIntegerField()
+    journey = models.ForeignKey(
+        Journey,
+        on_delete=models.CASCADE,
+        related_name="tickets"
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="tickets"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["journey", "carriage", "seat"],
+                name="unique_ticket_for_journey"
+            )
+        ]
+        ordering = ("carriage", "seat")
+
+    def __str__(self):
+        return f"{self.journey} (carriage: {self.carriage}, seat: {self.seat})"
