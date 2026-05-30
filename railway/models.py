@@ -55,7 +55,7 @@ class TrainType(models.Model):
 
 class Train(models.Model):
     name = models.CharField(max_length=255)
-    carriages_count = models.PositiveIntegerField()
+    carriages = models.PositiveIntegerField()
     seats_in_carriage = models.PositiveIntegerField()
     train_type = models.ForeignKey(
         TrainType,
@@ -66,7 +66,7 @@ class Train(models.Model):
     def __str__(self):
         return (
             f"{self.name} "
-            f"({self.carriages_count} carriages, "
+            f"({self.carriages} carriages, "
             f"{self.seats_in_carriage} seats per carriage)"
         )
 
