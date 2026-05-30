@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework import mixins, viewsets
 from django.db.models import Count, Prefetch
 
@@ -127,6 +129,32 @@ class JourneyViewSet(
 
     def get_queryset(self):
         queryset = self.queryset
+
+        if self.action == "list":
+            source = self.request.query_params.get("source")
+            destination = self.request.query_params.get("destination")
+            departure_date = self.request.query_params.get("departure_date")
+            train = self.request.query_params.get("train")
+
+            if source:
+                queryset = queryset.filter(
+                    route__source__name__icontains=source
+                )
+
+            if destination:
+                queryset = queryset.filter(
+                    route__destination__name__icontains=destination
+                )
+
+            if departure_date:
+                departure_date = datetime.strptime(
+                    departure_date, "%Y-%m-%d"
+                ).date()
+
+                queryset = queryset.filter(departure_time__date=departure_date)
+
+            if train:
+                queryset = queryset.filter(train__name__icontains=train)
 
         if self.action in ("list", "retrieve"):
             queryset = queryset.select_related(
