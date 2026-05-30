@@ -7,7 +7,9 @@ from railway.models import (
     TrainType,
     Train,
     Journey,
-    Crew
+    Crew,
+    Ticket,
+    Order
 )
 from railway.serializers import (
     StationSerializer,
@@ -21,7 +23,9 @@ from railway.serializers import (
     JourneyRetrieveSerializer,
     CrewSerializer,
     CrewListSerializer,
-    CrewRetrieveSerializer
+    CrewRetrieveSerializer,
+    OrderSerializer,
+    OrderListSerializer
 )
 
 
@@ -138,13 +142,7 @@ class JourneyViewSet(
         return queryset
 
 
-class CrewViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet
-):
+class CrewViewSet(viewsets.ModelViewSet):
     queryset = Crew.objects.all()
     serializer_class = CrewSerializer
 
@@ -179,3 +177,37 @@ class CrewViewSet(
             )
 
         return queryset
+
+
+class OrderViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = Order.objects.prefetch_related(
+        Prefetch(
+            "tickets",
+            queryset=Ticket.objects.select_related(
+                "journey",
+                "journey__route",
+                "journey__route__source",
+                "journey__route__destination",
+                "journey__train",
+            )
+        )
+    )
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+    def get_serializer_class(self):
+        serializer = self.serializer_class
+
+        if self.action == "list":
+            serializer = OrderListSerializer
+
+        return serializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
