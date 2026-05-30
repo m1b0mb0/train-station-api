@@ -1,11 +1,13 @@
 from rest_framework import mixins, viewsets
+from django.db.models import Count, Prefetch
 
 from railway.models import (
     Station,
     Route,
     TrainType,
     Train,
-    Journey
+    Journey,
+    Crew
 )
 from railway.serializers import (
     StationSerializer,
@@ -16,7 +18,10 @@ from railway.serializers import (
     TrainListSerializer,
     JourneySerializer,
     JourneyListSerializer,
-    JourneyRetrieveSerializer
+    JourneyRetrieveSerializer,
+    CrewSerializer,
+    CrewListSerializer,
+    CrewRetrieveSerializer
 )
 
 
@@ -129,5 +134,48 @@ class JourneyViewSet(
 
         if self.action == "retrieve":
             queryset = queryset.select_related("train__train_type")
+
+        return queryset
+
+
+class CrewViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet
+):
+    queryset = Crew.objects.all()
+    serializer_class = CrewSerializer
+
+    def get_serializer_class(self):
+        serializer = self.serializer_class
+
+        if self.action == "list":
+            serializer = CrewListSerializer
+
+        if self.action in "retrieve":
+            serializer = CrewRetrieveSerializer
+
+        return serializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        if self.action == "list":
+            queryset = queryset.annotate(journeys_count=Count("journeys"))
+
+        if self.action == "retrieve":
+            queryset = queryset.prefetch_related(
+                Prefetch(
+                    "journeys",
+                    queryset=Journey.objects.select_related(
+                        "route",
+                        "route__source",
+                        "route__destination",
+                        "train"
+                    )
+                )
+            )
 
         return queryset
