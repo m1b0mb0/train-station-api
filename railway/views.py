@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from rest_framework import mixins, viewsets
-from django.db.models import Count, Prefetch
+from django.db.models import Count, Prefetch, F
 
 from railway.models import (
     Station,
@@ -156,16 +156,27 @@ class JourneyViewSet(
             if train:
                 queryset = queryset.filter(train__name__icontains=train)
 
-        if self.action in ("list", "retrieve"):
+        if self.action == "list":
             queryset = queryset.select_related(
                 "route",
                 "route__source",
                 "route__destination",
                 "train",
+            ).annotate(
+                tickets_available=(
+                    F("train__carriages") * F("train__seats_in_carriage") 
+                    - Count("tickets")
+                )
             )
 
         if self.action == "retrieve":
-            queryset = queryset.select_related("train__train_type")
+            queryset = queryset.select_related(
+                "route",
+                "route__source",
+                "route__destination",
+                "train",
+                "train__train_type",
+            )
 
         return queryset
 

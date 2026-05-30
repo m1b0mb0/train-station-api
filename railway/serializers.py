@@ -82,6 +82,11 @@ class JourneyListSerializer(JourneySerializer):
         source="train.name",
         read_only=True
     )
+    train_capacity = serializers.IntegerField(
+        source="train.capacity",
+        read_only=True
+    )
+    tickets_available = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Journey
@@ -89,6 +94,8 @@ class JourneyListSerializer(JourneySerializer):
             "id",
             "route",
             "train_name",
+            "train_capacity",
+            "tickets_available",
             "departure_time",
             "arrival_time"
         )
