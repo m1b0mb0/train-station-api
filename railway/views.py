@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from rest_framework import mixins, viewsets
+from rest_framework.permissions import IsAuthenticated
 from django.db.models import Count, Prefetch, F
 
 from railway.models import (
@@ -236,6 +237,7 @@ class OrderViewSet(
         )
     )
     serializer_class = OrderSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
