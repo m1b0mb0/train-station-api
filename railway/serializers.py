@@ -137,14 +137,14 @@ class CrewRetrieveSerializer(CrewSerializer):
     journeys = JourneyListSerializer(many=True, read_only=True)
 
 
-class TicketSerilizer(serializers.ModelSerializer):
+class TicketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ticket
         fields = ("id", "carriage", "seat", "journey")
 
     def validate(self, attrs):
-        data =  super(TicketSerilizer, self).validate(attrs)
+        data =  super(TicketSerializer, self).validate(attrs)
         Ticket.validate_ticket(
             attrs["carriage"],
             attrs["seat"],
@@ -154,12 +154,12 @@ class TicketSerilizer(serializers.ModelSerializer):
         return data
 
 
-class TicketListSerializer(TicketSerilizer):
+class TicketListSerializer(TicketSerializer):
     journey = JourneyListSerializer(read_only=True)
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    tickets = TicketSerilizer(
+    tickets = TicketSerializer(
         many=True,
         read_only=False,
         allow_empty=False

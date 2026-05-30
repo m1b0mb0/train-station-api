@@ -152,7 +152,7 @@ class CrewViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             serializer = CrewListSerializer
 
-        if self.action in "retrieve":
+        if self.action == "retrieve":
             serializer = CrewRetrieveSerializer
 
         return serializer
