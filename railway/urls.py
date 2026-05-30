@@ -5,7 +5,8 @@ from railway.views import (
     StationViewSet,
     RouteViewSet,
     TrainTypeViewSet,
-    TrainViewSet
+    TrainViewSet,
+    JourneyViewSet
 )
 
 
@@ -14,6 +15,7 @@ router.register("stations", StationViewSet)
 router.register("routes", RouteViewSet)
 router.register("train_types", TrainTypeViewSet)
 router.register("trains", TrainViewSet)
+router.register("journeys", JourneyViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),

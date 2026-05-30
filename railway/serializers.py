@@ -4,7 +4,8 @@ from railway.models import (
     Station,
     Route,
     TrainType,
-    Train
+    Train,
+    Journey
 )
 
 
@@ -52,3 +53,42 @@ class TrainListSerializer(TrainSerializer):
         source="train_type.name",
         read_only=True
     )
+
+
+class JourneySerializer(serializers.ModelSerializer):
+    route = serializers.PrimaryKeyRelatedField(
+        queryset=Route.objects.select_related("source", "destination")
+    )
+
+    class Meta:
+        model = Journey
+        fields = (
+            "id",
+            "route",
+            "train",
+            "departure_time",
+            "arrival_time"
+        )
+
+
+class JourneyListSerializer(JourneySerializer):
+    route = serializers.StringRelatedField(read_only=True)
+    train_name = serializers.CharField(
+        source="train.name",
+        read_only=True
+    )
+
+    class Meta:
+        model = Journey
+        fields = (
+            "id",
+            "route",
+            "train_name",
+            "departure_time",
+            "arrival_time"
+        )
+
+
+class JourneyRetrieveSerializer(JourneySerializer):
+    route = RouteListSerializer(read_only=True)
+    train = TrainListSerializer(read_only=True)
