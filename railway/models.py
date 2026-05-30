@@ -71,6 +71,10 @@ class Train(models.Model):
             f"{self.seats_in_carriage} seats per carriage)"
         )
 
+    @property
+    def capacity(self) -> int:
+        return self.carriages * self.seats_in_carriage
+
 
 class Journey(models.Model):
     route = models.ForeignKey(
@@ -107,7 +111,7 @@ class Crew(models.Model):
         return f"{self.first_name} {self.last_name}"
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         return f"{self.first_name} {self.last_name}"
 
 
